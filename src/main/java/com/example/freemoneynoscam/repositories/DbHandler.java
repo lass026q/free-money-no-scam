@@ -1,103 +1,101 @@
 package com.example.freemoneynoscam.repositories;
+
+import com.example.freemoneynoscam.services.Email;
+
 import java.sql.*;
-import java.util.Scanner;
+import java.util.ArrayList;
 
 public class DbHandler
 {
-    static Connection con;
-    static Statement stmt;
-    static ResultSet rs;
-    static String sqlString;
+    private String sqlString;
+    private Connection con;
+    private Statement stmt;
 
-    public static void connect()
+    public void updateDb(String email)
     {
-
-        //on the localhost with the default port number 3306.
-        String url = "jdbc:mysql://localhost:3306/free_money";
-
-        //Get a connection to the database for a user named root with password admin
-        try {
-            con = DriverManager.getConnection(url, "root", "Skovdiget73");
-        } catch (Exception e) {
-            System.out.println("shit pommes frit, min DB connection virker ikke!!!");
-        }
-
-
-        //Display the URL and connection information
-        System.out.println("URL: " + url);
-        System.out.println("Connection: " + con);
+        connectDB();
+        makeTableEmails();
+        addEmail(email);
     }
 
-
-    public static void select()
+    public void connectDB()
     {
-        try {
-            //Get another statement object initialized as shown.
-            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-            //Query the database, storing the result in an object of type ResultSet
-            sqlString = "SELECT * from new_table";
-            rs = stmt.executeQuery(sqlString);
-
-            //Use the methods of class ResultSet in a loop
-            // to display all of the data in the result.
-            System.out.println("Display all results:");
-            while (rs.next()) {
-                String col1 = rs.getString("id");
-                String col2 = rs.getString("email");
-
-                System.out.println("\tid = " + col1 + "\temail = " + col2);
-            }//end while loop
-
+        try
+        {
+            String url = "jdbc:mysql://localhost:3306/emails_db";
+            con = DriverManager.getConnection(url, "root", "ekch22Lmysql");
+            stmt = con.createStatement();
+            System.out.println("Connected.");
+        } catch (Exception e)
+        {
+            System.out.println("Unable to connect");
         }
-        catch (Exception e){
+    }
+
+    public void closeConnection()
+    {
+        try
+        {
+            con.close();
+        } catch (SQLException e)
+        {
             e.printStackTrace();
         }
-        {
-            System.out.println("shit pommes frit, select gik galt");
-        }//end catch
     }
 
-    public static void insertData()
+    public void makeTableEmails()
     {
-        String først = "dummy";
-        String anden = "dummy";
-        String tredje = "dummy";
+        try
+        {
 
-        Scanner input = new Scanner(System.in);
-        System.out.println("SKriv første");
-        først = input.nextLine();
-
-        try {
-            //Get another statement object initialized as shown.
-            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-            sqlString = "INSERT INTO tabel" + "(id, email)" +
-                    "VALUES (" + først + "," + anden + ")";
-
-
-            //Query the database, storing the result in an object of type ResultSet
-            sqlString = "SELECT * from new_table";
-            rs = stmt.executeQuery(sqlString);
-
-            //Use the methods of class ResultSet in a loop
-            // to display all of the data in the result.
-            System.out.println("Display all results:");
-            while (rs.next()) {
-                String col1 = rs.getString("id");
-                String col2 = rs.getString("email");
-
-                System.out.println("\tid = " + col1 + "\temail = " + col2);
-            }//end while loop
-        } catch (Exception e) {
+            sqlString = "CREATE TABLE IF NOT EXISTS `emails_db`.`emails` (" +
+                    "  `Email_id` INT NOT NULL AUTO_INCREMENT," +
+                    "  `Email_address` VARCHAR(45) NOT NULL," +
+                    "  PRIMARY KEY (`Email_id`));";
+            stmt.executeUpdate(sqlString);
+        } catch (Exception e)
+        {
+            System.out.println("DB error.");
         }
     }
 
-    public static void main(String[] args)
+    public void addEmail(String email)
     {
-        connect();
-        insertData();
-        select();
+        try
+        {
+            sqlString = "INSERT INTO emails (`Email_address`) VALUES(?)";
+            PreparedStatement statement = con.prepareStatement(sqlString);
+            statement.setString(1, email);
+            statement.executeUpdate();
+        } catch (Exception e)
+        {
+            System.out.println("DB error.");
+        }
+        closeConnection();
+    }
+
+    public ArrayList<Email> loadAddresses()
+    {
+        ArrayList<Email> emails = new ArrayList<>();
+        try
+        {
+            String sqlString = "SELECT Email_address FROM emails";
+
+            connectDB();
+
+            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = stmt.executeQuery(sqlString);
+
+            while (rs.next())
+            {
+                emails.add(new Email(rs.getString("Email_address")));
+            }
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        closeConnection();
+        return emails;
     }
 }
 

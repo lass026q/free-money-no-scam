@@ -6,8 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.ArrayList;
 
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 public class IndexController
 {
     private final ValidateEmailService ves = new ValidateEmailService();
+    private String email, invalid;
 
     @GetMapping("/index")
     public String start()
@@ -23,37 +23,37 @@ public class IndexController
     }
 
     @PostMapping("/index")
-    public String addEmail(@RequestParam("email") String email, RedirectAttributes attributes)
+    public String addEmail(WebRequest emailFromForm)
     {
-        attributes.addAttribute("email", email);
+        email = emailFromForm.getParameter("email");
+        assert email != null;
         boolean validEmail = ves.isEmailValid(email);
-        if (validEmail)
-        {
-            ves.addValidEmail(email);
-        }
-        return (validEmail) ? "redirect:/confirmation" : "redirect:/rejection";
+        boolean emailExists = ves.isEmailExisting(email);
+        invalid = ves.addValidEmail(email, validEmail, emailExists);
+        return (validEmail && !emailExists) ? "redirect:/confirmation" : "redirect:/rejection";
     }
 
     @GetMapping("/confirmation")
-    public String emailAdded(@RequestParam String email, Model model)
+    public String emailAdded(Model model)
     {
         model.addAttribute("email", email);
         return "confirmation";
     }
 
     @GetMapping("/rejection")
-    public String emailInvalid(@RequestParam String email, Model model)
+    public String emailInvalid(Model model)
     {
         model.addAttribute("email", email);
+        model.addAttribute("reason", invalid);
         return "rejection";
     }
 
-    // Adds a list of added emails from the db, like a dev mode feature
+
     @GetMapping("/list")
     public String listEmails(Model model)
     {
-        ArrayList<Email> emails = ves.getAddedEmails(); // Service layer interrogates the repository
-        model.addAttribute("emailList", emails); // Thymeleaf adds list of email objects
+        ArrayList<Email> emails = ves.getAddedEmails();
+        model.addAttribute("emailList", emails);
         return "list";
     }
 }

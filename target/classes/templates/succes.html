@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirm</title>
+  <link rel="stylesheet" th:href="@{style.css}" href="../static/style.css">
+</head>
+<body class="center">
+<div class="content">
+  <h2>Thank you 🙂</h2>
+  <p>
+    <span>The email address '</span>
+    <span th:text="${email}"></span>
+    <span>' has been added to the database.</span><br>
+  </p>
+  <div>
+    <button class="point" onclick="location.href='../index'">Enter another email to get more free money</button>
+  </div>
+</div>
+</body>
+</html>

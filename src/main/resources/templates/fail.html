@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rejection</title>
+    <link rel="stylesheet" th:href="@{style.css}" href="../static/style.css">
+</head>
+<body class="center">
+<div class="content">
+    <h2>Sorry 🙁</h2>
+    <p>
+        <span>The email address '</span>
+        <span th:text="${email}"></span>
+        <span>' seems to be </span>
+        <span th:text="${reason}"></span>
+        <br>
+    </p>
+    <div>
+        <button class="point" onclick="location.href='../index'">Why not try again</button>
+    </div>
+</div>
+</body>
+</html>

@@ -4,6 +4,7 @@ import com.example.freemoneynoscam.services.Email;
 import com.example.freemoneynoscam.repositories.DbHandler;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ValidateEmailService
 {
@@ -17,9 +18,27 @@ public class ValidateEmailService
         return trunk == 1 && email.contains(".");
     }
 
-    public void addValidEmail(String email)
+    public boolean isEmailExisting(String email)
     {
-        db.updateDb(email);
+        ArrayList<Email> emails = getAddedEmails();
+        int count = 0;
+        for (Email e : emails)
+        {
+            if (Objects.equals(e.getEmailAddress(), email))
+            {
+                count++;
+            }
+        }
+        return (count != 0);
+    }
+
+    public String addValidEmail(String email, boolean valid, boolean exists)
+    {
+        if (valid && !exists)
+        {
+            db.updateDb(email);
+        }
+        return (exists) ? "already in the database." : "invalid.";
     }
 
     public ArrayList<Email> getAddedEmails()
