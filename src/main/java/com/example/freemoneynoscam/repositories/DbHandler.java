@@ -23,7 +23,7 @@ public class DbHandler
         try
         {
             String url = "jdbc:mysql://localhost:3306/emails_db";
-            con = DriverManager.getConnection(url, "root", "ekch22Lmysql");
+            con = DriverManager.getConnection(url, "root", "");
             stmt = con.createStatement();
             System.out.println("Connected.");
         } catch (Exception e)
